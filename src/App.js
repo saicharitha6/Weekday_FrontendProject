@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import './App.css';
 
 const App = () => {
   const [jobs, setJobs] = useState([]);
+  const [expandedDescriptionId, setExpandedDescriptionId] = useState(null);
 
   useEffect(() => {
     const fetchJobs = async () => {
@@ -23,16 +25,36 @@ const App = () => {
 
     fetchJobs();
   }, []);
-  console.log('Jobs State:', jobs); 
+
+  const toggleDescription = (id) => {
+    setExpandedDescriptionId(expandedDescriptionId === id ? null : id);
+  };
+
   return (
     <div>
-      <h1>List of Jobs</h1>
       <div className="job-cards-container">
         {jobs.map(job => (
           <div className="job-card" key={job.id}>
-            <h2>{job.jobRole}</h2>
-            <p>{job.description}</p>
-            {/* Include more details from the job object */}
+            <div className="top-card">
+              <h2>{job.jobRole}</h2>
+              <p>{job.companyName}</p>
+              <p>{job.location}</p>
+            </div>
+            <h3>Estimated Salary</h3>
+            <p>{job.minJdSalary}-{job.maxJdSalary} {job.salaryCurrencyCode}</p>
+            <h3>Description</h3>
+            <p>
+              {expandedDescriptionId === job.id
+                ? job.jobDetailsFromCompany // Show full description if expanded
+                : `${job.jobDetailsFromCompany.slice(0, 150)}...`} {/* Truncate description if not expanded */}
+              <button onClick={() => toggleDescription(job.id)}>
+                {expandedDescriptionId === job.id ? "Collapse" : "Expand"}
+              </button>
+            </p>
+            <h3>Experience Required</h3><p> {job.minExp}</p>
+            <div className="button-container">
+              <button>Apply Now</button>
+            </div>
           </div>
         ))}
       </div>
