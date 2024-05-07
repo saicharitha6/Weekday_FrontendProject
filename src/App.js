@@ -1,30 +1,30 @@
 import React, { useState, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchJobsSuccess, updateFilters } from './actions/jobActions';
 import axios from 'axios';
 import './App.css';
 
 const App = () => {
-  const [jobs, setJobs] = useState([]);
+  const dispatch = useDispatch();
+  // const jobs = useSelector(state => state.jobs.jobs);
+  const filteredJobs = useSelector(state => state.jobs.filteredJobs);
+  const filters = useSelector(state => state.jobs.filters);
   const [expandedDescriptionId, setExpandedDescriptionId] = useState(null);
-  const [filteredJobs, setFilteredJobs] = useState([]);
-  const [filters, setFilters] = useState({
-    companyName: '',
-    location: '',
-    jobRole: '',
-    minJdSalary: '',
-    minExp: '',
-    remote: ''
-  });
 
   useEffect(() => {
-    const fetchJobs = async () => {
+    const fetchAndFilterJobs = async () => {
       try {
         const response = await axios.post("https://api.weekday.technology/adhoc/getSampleJdJSON", {
           limit: 10,
           offset: 0
         });
+
         if (response.status === 200) {
-          setJobs(response.data.jdList);
-          setFilteredJobs(response.data.jdList);
+          dispatch(fetchJobsSuccess(response.data.jdList));
+
+          // Apply filters to the fetched jobs
+          const filtered = response.data.jdList.filter(job => applyFilters(job));
+          dispatch(fetchJobsSuccess(filtered));
         } else {
           throw new Error('Failed to fetch jobs');
         }
@@ -33,49 +33,36 @@ const App = () => {
       }
     };
 
-    fetchJobs();
-  }, []);
+    fetchAndFilterJobs();
+  }, [dispatch, filters]); // Depend on filters to refetch and apply filters
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
-    setFilters(prevFilters => ({
-      ...prevFilters,
-      [name]: value
-    }));
+    dispatch(updateFilters({ ...filters, [name]: value }));
   };
 
-  useEffect(() => {
-    if (jobs.length > 0) {
-      filterJobs();
+  const applyFilters = (job) => {
+    // Check for null values in the fields and exclude the job if any field is null
+    if (
+      job.companyName === null ||
+      job.location === null ||
+      job.jobRole === null ||
+      job.minExp === null ||
+      job.minJdSalary === null
+    ) {
+      return false;
     }
-  }, [filters, jobs]);
 
-  const filterJobs = () => {
-    const filtered = jobs.filter(job => {
-      // Check for null values in the fields and exclude the job if any field is null
-      if (
-        job.companyName === null ||
-        job.location === null ||
-        job.jobRole === null ||
-        job.minExp === null ||
-        job.minJdSalary === null
-      ) {
-        return false;
-      }
-
-      return (
-        job.companyName.toLowerCase().includes(filters.companyName.toLowerCase()) &&
-        job.location.toLowerCase().includes(filters.location.toLowerCase()) &&
-        job.jobRole.toLowerCase().includes(filters.jobRole.toLowerCase()) &&
-        (filters.minExp === '' || job.minExp >= parseInt(filters.minExp)) &&
-        // (filters.minJdSalary === '' || job.minJdSalary >= parseInt(filters.minJdSalary))
-        (filters.minJdSalary === '' || parseInt(filters.minJdSalary) === NaN || parseInt(filters.minJdSalary) <= job.minJdSalary) &&
-        // Filter for remote/onsite based on selected option
-        (filters.remote === '' || (filters.remote === 'remote' && job.location.toLowerCase() === 'remote') ||
-          (filters.remote === 'on-site' && job.location.toLowerCase() !== 'remote'))
-      );
-    });
-    setFilteredJobs(filtered);
+    return (
+      job.companyName.toLowerCase().includes(filters.companyName.toLowerCase()) &&
+      job.location.toLowerCase().includes(filters.location.toLowerCase()) &&
+      job.jobRole.toLowerCase().includes(filters.jobRole.toLowerCase()) &&
+      (filters.minExp === '' || job.minExp >= parseInt(filters.minExp)) &&
+      (filters.minJdSalary === '' || parseInt(filters.minJdSalary) <= job.minJdSalary) &&
+      // Filter for remote/onsite based on selected option
+      (filters.remote === '' || (filters.remote === 'remote' && job.location.toLowerCase() === 'remote') ||
+        (filters.remote === 'on-site' && job.location.toLowerCase() !== 'remote'))
+    );
   };
 
   const toggleDescription = (id) => {
