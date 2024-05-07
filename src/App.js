@@ -5,6 +5,15 @@ import './App.css';
 const App = () => {
   const [jobs, setJobs] = useState([]);
   const [expandedDescriptionId, setExpandedDescriptionId] = useState(null);
+  const [filteredJobs, setFilteredJobs] = useState([]);
+  const [filters, setFilters] = useState({
+    companyName: '',
+    location: '',
+    jobRole: '',
+    minJdSalary: '',
+    minExp: '',
+    remote: ''
+  });
 
   useEffect(() => {
     const fetchJobs = async () => {
@@ -14,7 +23,8 @@ const App = () => {
           offset: 0
         });
         if (response.status === 200) {
-          setJobs(response.data.jdList); // Assuming response.data contains the list of jobs
+          setJobs(response.data.jdList);
+          setFilteredJobs(response.data.jdList);
         } else {
           throw new Error('Failed to fetch jobs');
         }
@@ -26,14 +36,103 @@ const App = () => {
     fetchJobs();
   }, []);
 
+  const handleFilterChange = (e) => {
+    const { name, value } = e.target;
+    setFilters(prevFilters => ({
+      ...prevFilters,
+      [name]: value
+    }));
+  };
+
+  useEffect(() => {
+    if (jobs.length > 0) {
+      filterJobs();
+    }
+  }, [filters, jobs]);
+
+  const filterJobs = () => {
+    const filtered = jobs.filter(job => {
+      // Check for null values in the fields and exclude the job if any field is null
+      if (
+        job.companyName === null ||
+        job.location === null ||
+        job.jobRole === null ||
+        job.minExp === null ||
+        job.minJdSalary === null
+      ) {
+        return false;
+      }
+
+      return (
+        job.companyName.toLowerCase().includes(filters.companyName.toLowerCase()) &&
+        job.location.toLowerCase().includes(filters.location.toLowerCase()) &&
+        job.jobRole.toLowerCase().includes(filters.jobRole.toLowerCase()) &&
+        (filters.minExp === '' || job.minExp >= parseInt(filters.minExp)) &&
+        // (filters.minJdSalary === '' || job.minJdSalary >= parseInt(filters.minJdSalary))
+        (filters.minJdSalary === '' || parseInt(filters.minJdSalary) === NaN || parseInt(filters.minJdSalary) <= job.minJdSalary) &&
+        // Filter for remote/onsite based on selected option
+        (filters.remote === '' || (filters.remote === 'remote' && job.location.toLowerCase() === 'remote') ||
+          (filters.remote === 'on-site' && job.location.toLowerCase() !== 'remote'))
+      );
+    });
+    setFilteredJobs(filtered);
+  };
+
   const toggleDescription = (id) => {
     setExpandedDescriptionId(expandedDescriptionId === id ? null : id);
   };
 
   return (
     <div>
+      <div className="filters">
+        <input
+          type="text"
+          name="companyName"
+          placeholder="Company Name"
+          value={filters.companyName}
+          onChange={handleFilterChange}
+        />
+        <input
+          type="text"
+          name="location"
+          placeholder="Location"
+          value={filters.location}
+          onChange={handleFilterChange}
+        />
+        <input
+          type="text"
+          name="jobRole"
+          placeholder="Job Role"
+          value={filters.jobRole}
+          onChange={handleFilterChange}
+        />
+        <input
+          type="number"
+          name="minExp"
+          placeholder="Min Exp"
+          value={filters.minExp}
+          onChange={handleFilterChange}
+        />
+        <input
+          type="number"
+          name="minJdSalary"
+          placeholder="Min JD Salary"
+          value={filters.minJdSalary}
+          onChange={handleFilterChange}
+        />
+        {/* Select dropdown for remote/onsite */}
+        <select
+          name="remote"
+          value={filters.remote}
+          onChange={handleFilterChange}
+        >
+          <option value="">Remote/On-site</option>
+          <option value="remote">Remote</option>
+          <option value="on-site">On-site</option>
+        </select>
+      </div>
       <div className="job-cards-container">
-        {jobs.map(job => (
+        {filteredJobs.map(job => (
           <div className="job-card" key={job.id}>
             <div className="top-card">
               <h2>{job.jobRole}</h2>

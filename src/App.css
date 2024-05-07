@@ -45,6 +45,76 @@
   background-color: #0044cc;
 }
 
+.filters {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background-color: #f0f0f0;
+  border-radius: 5px;
+  margin-bottom: 20px;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.filters input {
+  width: calc(50% - 5px); /* Each input takes 50% width with a small gap */
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
+/* Adjust input width for smaller screens */
+@media screen and (max-width: 768px) {
+  .filters input {
+    width: 100%; /* Full width for smaller screens */
+  }
+}
+
+.filters input[type="text"],
+.filters input[type="number"],
+.filters select {
+  flex: 1;
+  margin-right: 10px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.filters select {
+  background-color: #fff;
+  cursor: pointer;
+}
+
+.filters input[type="text"]:last-child,
+.filters input[type="number"]:last-child {
+  margin-right: 0;
+}
+
+.filters input[type="text"]::placeholder,
+.filters input[type="number"]::placeholder {
+  color: #999;
+}
+
+.filters button {
+  background-color: blue;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+.filters button:hover {
+  background-color: #0044cc;
+}
+
+
 
 @media screen and (max-width: 768px) {
   .job-card {
