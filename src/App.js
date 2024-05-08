@@ -14,14 +14,14 @@ const App = () => {
   useEffect(() => {
     const fetchAndFilterJobs = async () => {
       try {
+        //api for getting the joblist and totalCount 
         const response = await axios.post("https://api.weekday.technology/adhoc/getSampleJdJSON", {
           limit: 10,
           offset: 0
         });
 
         if (response.status === 200) {
-          dispatch(fetchJobsSuccess(response.data.jdList));
-
+          dispatch(fetchJobsSuccess(response.data.jdList));//get all joblist data
           // Apply filters to the fetched jobs
           const filtered = response.data.jdList.filter(job => applyFilters(job));
           dispatch(fetchJobsSuccess(filtered));
@@ -120,7 +120,7 @@ const App = () => {
       </div>
       <div className="job-cards-container">
         {filteredJobs.map(job => (
-          <div className="job-card" key={job.id}>
+          <div className="job-card" key={job.jdUid}>
             <div className="top-card">
               <h2>{job.jobRole}</h2>
               <p>{job.companyName}</p>

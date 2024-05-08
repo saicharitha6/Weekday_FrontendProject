@@ -1,4 +1,42 @@
+# Candidate Application Platform
+
+This task is to create a candidate application platform that allows users to view job listings, filter jobs based on various criteria, and implement infinite scroll for a seamless browsing experience. The platform should provide a user-friendly interface for viewing and applying to jobs.
+
+I have created the simple UI for the below Requirements using react, redux, vanilla css
+
+Job Cards: Each job listing should be displayed as a card containing the following information:
+Job title
+Company name
+Location
+Job description (limited to a certain number of characters with an option to expand)
+Experience required
+Apply button
+
+
+Filters: Implement filters to allow users to refine the job listings based on:
+Min experience
+Company name
+Location
+Remote/on-site
+Role
+Min base pay
+
+Api Usage:
+For the jobs data I have integrate the below api which takes limit and offset as request body parameter and returns the list of jobs and totalCount of jobs present.
+"https://api.weekday.technology/adhoc/getSampleJdJSON"
+
+
+
+
 # Getting Started with Create React App
+
+
+# steps to run the project
+First install npm after cloning project
+npm install
+
+# How to Run the project
+npm start
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
